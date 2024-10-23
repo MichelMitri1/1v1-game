@@ -276,7 +276,7 @@ class Bullet2 extends Sprite {
   constructor(x, y, width, height) {
     super();
     this.x = x;
-    this.dx = 7;
+    this.dx = 15;
     this.y = y;
     this.width = width;
     this.height = height;
