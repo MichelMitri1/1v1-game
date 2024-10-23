@@ -141,7 +141,7 @@ class Hero extends Sprite {
     ctx.fillStyle = "red";
     ctx.fillRect(this.x, this.y - 10, this.width, 5);
     ctx.fillStyle = "green";
-    ctx.fillRect(this.x, this.y - 10, this.width * (this.health / 5), 5); // Health
+    ctx.fillRect(this.x, this.y - 10, this.width * (this.health / 5), 5);
   }
 }
 
@@ -256,7 +256,7 @@ class Bullet extends Sprite {
   constructor(x, y, width, height) {
     super();
     this.x = x;
-    this.dx = 7;
+    this.dx = 15;
     this.y = y;
     this.width = width;
     this.height = height;
