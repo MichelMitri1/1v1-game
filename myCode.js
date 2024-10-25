@@ -54,6 +54,8 @@ class Hero extends Sprite {
     this.bulletsInRound = 10;
     this.reloading = false;
     this.health = 5;
+    this.characterImage = new Image();
+    this.characterImage.src = "/elieKanze.png";
   }
 
   update(sprites, keys) {
@@ -132,16 +134,23 @@ class Hero extends Sprite {
   }
 
   draw(ctx) {
-    ctx.fillStyle = "purple";
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    // ctx.fillStyle = "purple";
+    // ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.drawImage(
+      this.characterImage,
+      this.x,
+      this.y - 190,
+      this.width * 6,
+      this.height * 6
+    );
     this.drawHealthBar(ctx);
   }
 
   drawHealthBar(ctx) {
     ctx.fillStyle = "red";
-    ctx.fillRect(this.x, this.y - 10, this.width, 5);
+    ctx.fillRect(this.x + 125, this.y - 120, this.width, 5);
     ctx.fillStyle = "green";
-    ctx.fillRect(this.x, this.y - 10, this.width * (this.health / 5), 5);
+    ctx.fillRect(this.x + 125, this.y - 120, this.width * (this.health / 5), 5);
   }
 }
 
@@ -162,6 +171,8 @@ class Hero2 extends Sprite {
     this.bulletsInRound = 10;
     this.reloading = false;
     this.health = 5;
+    this.characterImage = new Image();
+    this.characterImage.src = "/hannaStare.png";
   }
 
   update(sprites, keys) {
@@ -228,7 +239,7 @@ class Hero2 extends Sprite {
       }
     }
 
-    if (this.health === 0) {
+    if (this.health <= 0) {
       player1Score += 1;
       score.innerHTML = `Score: ${player1Score} | ${player2Score}`;
       resetGame(
@@ -240,16 +251,23 @@ class Hero2 extends Sprite {
   }
 
   draw(ctx) {
-    ctx.fillStyle = "black";
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    // ctx.fillStyle = "black";
+    // ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.drawImage(
+      this.characterImage,
+      this.x - 200,
+      this.y - 130,
+      this.width * 3,
+      this.height * 3.5
+    );
     this.drawHealthBar(ctx);
   }
 
   drawHealthBar(ctx) {
     ctx.fillStyle = "red";
-    ctx.fillRect(this.x, this.y - 10, this.width, 5);
+    ctx.fillRect(this.x - 150, this.y - 120, this.width, 5);
     ctx.fillStyle = "green";
-    ctx.fillRect(this.x, this.y - 10, this.width * (this.health / 5), 5);
+    ctx.fillRect(this.x - 150, this.y - 120, this.width * (this.health / 5), 5);
   }
 }
 class Bullet extends Sprite {
@@ -268,7 +286,7 @@ class Bullet extends Sprite {
 
   draw(ctx) {
     ctx.fillStyle = "purple";
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.fillRect(this.x + 150, this.y - 70, this.width, this.height);
   }
 }
 
@@ -288,7 +306,7 @@ class Bullet2 extends Sprite {
 
   draw(ctx) {
     ctx.fillStyle = "black";
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.fillRect(this.x - 150, this.y - 50, this.width, this.height);
   }
 }
 
@@ -306,6 +324,20 @@ class Ground extends Sprite {
     ctx.fillStyle = "green";
     ctx.fillRect(0, this.y, this.width, this.height);
   }
+}
+
+class Wall extends Sprite {
+  constructor(x, y, width, height) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+  }
+
+  update() {}
+
+  draw() {}
 }
 
 var game = new Game();
