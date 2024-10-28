@@ -55,7 +55,7 @@ class Hero extends Sprite {
     this.reloading = false;
     this.health = 5;
     this.characterImage = new Image();
-    this.characterImage.src = "/elieKanze.png";
+    this.characterImage.src = "path/to/your/hero.png";
   }
 
   update(sprites, keys) {
@@ -134,23 +134,16 @@ class Hero extends Sprite {
   }
 
   draw(ctx) {
-    // ctx.fillStyle = "purple";
-    // ctx.fillRect(this.x, this.y, this.width, this.height);
-    ctx.drawImage(
-      this.characterImage,
-      this.x,
-      this.y - 190,
-      this.width * 6,
-      this.height * 6
-    );
+    ctx.fillStyle = "purple";
+    ctx.fillRect(this.x, this.y, this.width, this.height);
     this.drawHealthBar(ctx);
   }
 
   drawHealthBar(ctx) {
     ctx.fillStyle = "red";
-    ctx.fillRect(this.x + 125, this.y - 120, this.width, 5);
+    ctx.fillRect(this.x, this.y - 10, this.width, 5);
     ctx.fillStyle = "green";
-    ctx.fillRect(this.x + 125, this.y - 120, this.width * (this.health / 5), 5);
+    ctx.fillRect(this.x, this.y - 10, this.width * (this.health / 5), 5);
   }
 }
 
@@ -171,8 +164,6 @@ class Hero2 extends Sprite {
     this.bulletsInRound = 10;
     this.reloading = false;
     this.health = 5;
-    this.characterImage = new Image();
-    this.characterImage.src = "/hannaStare.png";
   }
 
   update(sprites, keys) {
@@ -251,23 +242,16 @@ class Hero2 extends Sprite {
   }
 
   draw(ctx) {
-    // ctx.fillStyle = "black";
-    // ctx.fillRect(this.x, this.y, this.width, this.height);
-    ctx.drawImage(
-      this.characterImage,
-      this.x - 200,
-      this.y - 130,
-      this.width * 3,
-      this.height * 3.5
-    );
+    ctx.fillStyle = "black";
+    ctx.fillRect(this.x, this.y, this.width, this.height);
     this.drawHealthBar(ctx);
   }
 
   drawHealthBar(ctx) {
     ctx.fillStyle = "red";
-    ctx.fillRect(this.x - 150, this.y - 120, this.width, 5);
+    ctx.fillRect(this.x, this.y - 10, this.width, 5);
     ctx.fillStyle = "green";
-    ctx.fillRect(this.x - 150, this.y - 120, this.width * (this.health / 5), 5);
+    ctx.fillRect(this.x, this.y - 10, this.width * (this.health / 5), 5);
   }
 }
 class Bullet extends Sprite {
@@ -286,7 +270,7 @@ class Bullet extends Sprite {
 
   draw(ctx) {
     ctx.fillStyle = "purple";
-    ctx.fillRect(this.x + 150, this.y - 70, this.width, this.height);
+    ctx.fillRect(this.x, this.y, this.width, this.height);
   }
 }
 
@@ -306,7 +290,7 @@ class Bullet2 extends Sprite {
 
   draw(ctx) {
     ctx.fillStyle = "black";
-    ctx.fillRect(this.x - 150, this.y - 50, this.width, this.height);
+    ctx.fillRect(this.x, this.y, this.width, this.height);
   }
 }
 
