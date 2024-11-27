@@ -18,9 +18,16 @@ class Game {
   addSprite(sprite) {
     this.sprites.push(sprite);
   }
-
   update() {
-    this.sprites.forEach((sprite) => sprite.update(this.sprites, this.keys));
+    let updatedSprites = [];
+    for (let i = 0; i < this.sprites.length; i++) {
+      let sprite = this.sprites[i];
+
+      if (!sprite.update(this.sprites, this.keys)) {
+        updatedSprites.push(sprite);
+      }
+    }
+    this.sprites = updatedSprites;
   }
 
   draw() {
