@@ -71,6 +71,10 @@ class Skeleton extends Sprite {
     this.drawHealthBar(ctx);
   }
 
+  getCurrentFrameIndex() {
+    return this.frameIndex;
+  }
+
   drawHealthBar(ctx) {
     const healthBarWidth = this.width * (this.health / 25);
     if (this.health < 0) {

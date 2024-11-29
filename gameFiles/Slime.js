@@ -12,6 +12,7 @@ class Slime extends Sprite {
     this.numberOfFrames = 4;
     this.health = 10;
     this.destroyed = false;
+    this.isFrozen = false;
     this.slime = new Image();
     this.slime.src = "/animation/slime/slime.png";
   }
@@ -58,7 +59,14 @@ class Slime extends Sprite {
     ctx.fillRect(this.x - 22, this.y + 10, healthBarWidth, 5);
   }
 
-  animationFinished() {
-    return this.frameIndex >= this.numberOfFrames;
+  animationCycleComplete() {
+    return (
+      this.frameIndex === this.numberOfFrames - 1 &&
+      this.tickCount === this.ticksPerFrame
+    );
+  }
+
+  getCurrentFrameIndex() {
+    return this.frameIndex;
   }
 }

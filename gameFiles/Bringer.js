@@ -68,6 +68,10 @@ class Bringer extends Sprite {
     this.drawHealthBar(ctx);
   }
 
+  getCurrentFrameIndex() {
+    return this.frameIndex;
+  }
+
   drawHealthBar(ctx) {
     const healthBarWidth = (this.width - 100) * (this.health / 35);
 

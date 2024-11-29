@@ -11,6 +11,7 @@ class Samurai extends Sprite {
     this.ticksPerFrame = 7;
     this.health = 30;
     this.destroyed = false;
+    this.isFrozen = false;
     this.currentRow = 0;
     this.reverseAnimation = true;
 
@@ -87,6 +88,10 @@ class Samurai extends Sprite {
       this.height
     );
     this.drawHealthBar(ctx);
+  }
+
+  getCurrentFrameIndex() {
+    return this.frameIndex;
   }
 
   drawHealthBar(ctx) {
