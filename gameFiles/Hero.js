@@ -13,7 +13,7 @@ class Hero extends Sprite {
     this.groundY = y;
     this.canShoot = true;
     this.reloading = false;
-    this.health = 100;
+    this.health = 200;
     this.score = 0;
     this.shootSoundEffect = new Audio("/audioFiles/shooting.wav");
     this.orbSoundEffect = new Audio("/audioFiles/shootingOrb.mp3");
@@ -93,7 +93,6 @@ class Hero extends Sprite {
     document.head.appendChild(fontLink);
 
     const styleElement = document.createElement("style");
-    styleElement.type = "text/css";
     styleElement.innerHTML = `
       .tiny5-regular {
         font-family: "Tiny5", sans-serif;
@@ -298,7 +297,7 @@ class Hero extends Sprite {
               target.frameIndex = 0;
               target.dx = 0;
               target.isFrozen = true;
-              target.ticksPerFrame = 10;
+              target.ticksPerFrame = 8;
               target.changeAnimation("attack");
             }
 
@@ -494,7 +493,7 @@ class Hero extends Sprite {
   }
 
   drawHealthBar(ctx) {
-    const healthBarWidth = this.width * (this.health / 100);
+    const healthBarWidth = this.width * (this.health / 200);
 
     ctx.fillStyle = "red";
     ctx.fillRect(this.x - 22, this.y + 10, this.width, 5);

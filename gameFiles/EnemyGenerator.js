@@ -3,7 +3,7 @@ class EnemyGenerator {
     this.enemies = [];
     this.finalBoss = null;
     this.defeatedEnemies = 0;
-    this.maxEnemies = 10;
+    this.maxEnemies = 20;
     this.spawnIndex = 0;
     this.spawnDelayFrames = 420;
     this.currentFrame = 0;

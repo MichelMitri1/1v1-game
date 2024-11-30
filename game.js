@@ -12,17 +12,26 @@ class Game {
     this.ctx = this.canvas.getContext("2d");
     this.sprites = [];
     this.keys = {};
+    this.paused = false;
+    this.resetart = false;
     this.bindKeyboardEvents();
   }
 
   addSprite(sprite) {
     this.sprites.push(sprite);
   }
+
   update() {
+    if (this.restart) {
+      this.restart = false;
+      this.paused = false;
+      this.sprites = [];
+    }
+    if (this.paused) return;
+
     let updatedSprites = [];
     for (let i = 0; i < this.sprites.length; i++) {
       let sprite = this.sprites[i];
-
       if (!sprite.update(this.sprites, this.keys)) {
         updatedSprites.push(sprite);
       }
@@ -44,6 +53,13 @@ class Game {
   bindKeyboardEvents() {
     window.addEventListener("keydown", (e) => {
       this.keys[e.key] = true;
+
+      if (e.key === "p") {
+        this.paused = true;
+      }
+      if (e.key === "c") {
+        this.paused = false;
+      }
     });
 
     window.addEventListener("keyup", (e) => {
