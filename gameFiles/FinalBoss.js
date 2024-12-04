@@ -15,7 +15,6 @@ class FinalBoss extends Sprite {
     this.destroyed = false;
     this.currentRow = 0;
     this.reverseAnimation = false;
-
     this.animations = {
       idle: { src: "/animation/finalBoss/IDLE.png", frames: 4 },
       attack: { src: "/animation/finalBoss/ATTACK.png", frames: 8 },
@@ -23,12 +22,11 @@ class FinalBoss extends Sprite {
       flying: { src: "/animation/finalBoss/FLYING.png", frames: 4 },
       hurt: { src: "/animation/finalBoss/HURT.png", frames: 4 },
     };
-
     this.currentAnimation = "flying";
     this.finalBoss = new Image();
     this.finalBoss.src = this.animations[this.currentAnimation].src;
     this.numberOfFrames = this.animations[this.currentAnimation].frames;
-    this.shootCooldown = 1000;
+    this.shootCooldown = 700;
     this.lastShootTime = performance.now();
   }
 
@@ -91,7 +89,7 @@ class FinalBoss extends Sprite {
   shootProjectile(sprites) {
     const projectile = new Projectile(
       this.x,
-      this.y + this.height / 2 + 10,
+      this.y + this.height / 2 - 50,
       100,
       100,
       5

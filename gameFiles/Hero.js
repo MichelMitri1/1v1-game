@@ -582,3 +582,5 @@ var menuScreen = new MenuScreen();
 game.addSprite(menuScreen);
 game.animate();
 game.animate();
+game.animate();
+game.animate();
