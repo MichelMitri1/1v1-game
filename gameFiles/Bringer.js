@@ -15,11 +15,12 @@ class Bringer extends Sprite {
     this.currentRow = 1;
     this.reverseAnimation = false;
     this.isFrozen = false;
+    this.isPowerUpDropped = false;
     this.bringer = new Image();
     this.bringer.src = "/animation/bringer/bringer.png";
   }
 
-  update() {
+  update(sprites) {
     if (this.destroyed) {
       this.dx = 0;
 
@@ -30,6 +31,10 @@ class Bringer extends Sprite {
         if (this.frameIndex >= this.numberOfFrames) {
           this.frameIndex = this.numberOfFrames - 1;
         }
+      }
+      if (!this.isPowerUpDropped) {
+        this.dropPowerUp(sprites);
+        this.isPowerUpDropped = true;
       }
 
       return this.animationFinished();
@@ -47,6 +52,16 @@ class Bringer extends Sprite {
     this.x -= this.dx;
 
     return this.destroyed;
+  }
+
+  dropPowerUp(sprites) {
+    const dropChance = Math.random();
+    if (dropChance < 0.3) {
+      const types = ["health", "shield", "shootCooldown", "orbReady"];
+      const randomType = types[Math.floor(Math.random() * types.length)];
+      const powerup = new PowerUp(this.x, 595, randomType);
+      sprites.push(powerup);
+    }
   }
 
   draw(ctx) {

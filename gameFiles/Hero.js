@@ -10,15 +10,19 @@ class Hero extends Sprite {
     this.isJumping = false;
     this.gravity = 0.1;
     this.jumpStrength = -5;
+    this.isShielded = true;
+    this.isHit = false;
     this.groundY = y;
-    this.canShoot = true;
-    this.reloading = false;
     this.health = 200;
+    this.shieldHealth = 60;
+    this.isShootingFaster = false;
+    this.shootCooldown = 23;
     this.score = 0;
     this.shootSoundEffect = new Audio("/audioFiles/shooting.wav");
     this.orbSoundEffect = new Audio("/audioFiles/shootingOrb.mp3");
     this.deathSoundEffect = new Audio("/audioFiles/deathSound.mp3");
     this.orbCooldown = 1600;
+    this.rapidFireCooldown = 0;
     this.originalOrbCooldown = this.orbCooldown;
     this.isTakingDamage = false;
     this.level = 1;
@@ -52,7 +56,7 @@ class Hero extends Sprite {
       death: {
         spriteSheet: new Image(),
         numberOfFrames: 6,
-        ticksPerFrame: 20,
+        ticksPerFrame: 40,
       },
     };
 
@@ -129,12 +133,16 @@ class Hero extends Sprite {
   }
 
   update(sprites, keys) {
-    this.handleMovement(keys);
-    this.handleShooting(sprites, keys);
-    this.updateAnimation();
-    this.handleCheckIfEnemyCloseToPlayer(sprites);
-    this.handlePlayerDeath();
-    this.handleCollisions(sprites);
+    if (this.health > 0) {
+      this.handleMovement(keys);
+      this.handleShooting(sprites, keys);
+      this.handleCheckIfEnemyCloseToPlayer(sprites);
+      this.handleCollisions(sprites);
+      this.updateAnimation(this.currentAnimation);
+    } else {
+      this.updateAnimation("death");
+      this.handlePlayerDeath();
+    }
   }
 
   handleMovement(keys) {
@@ -197,9 +205,16 @@ class Hero extends Sprite {
       const shootSoundEffectInstance = this.shootSoundEffect.cloneNode();
       shootSoundEffectInstance.play();
       sprites.push(bullet);
-      this.shootCooldown = 23;
-    }
+      if (this.isShootingFaster && this.rapidFireCooldown > 0) {
+        this.rapidFireCooldown -= 1;
 
+        this.shootCooldown = 10;
+      } else {
+        this.rapidFireCooldown = 0;
+        this.isShootingFaster = false;
+        this.shootCooldown = 23;
+      }
+    }
     if (!keys[" "]) {
       this.shootCooldown = 0;
     }
@@ -225,132 +240,145 @@ class Hero extends Sprite {
 
     targets.forEach((target) => {
       if (this.health > 0) {
-        if (target instanceof Bringer) {
-          const isClose = target.x <= this.x + this.width - 20;
+        let isClose;
 
-          if (isClose && target.health > 0) {
-            if (!target.isFrozen) {
-              target.frameIndex = 0;
+        switch (true) {
+          case target instanceof Bringer:
+            isClose = target.x <= this.x + this.width - 20;
+            if (isClose && target.health > 0) {
+              if (!target.isFrozen) {
+                target.frameIndex = 0;
+                target.currentRow = 2;
+                target.dx = 0;
+                target.isFrozen = true;
+              }
+              if (
+                target.getCurrentFrameIndex() === target.numberOfFrames - 1 &&
+                target.tickCount === 0 &&
+                !this.isTakingDamage
+              ) {
+                if (this.shieldHealth > 0) {
+                  this.isShielded = true;
+                  this.shieldHealth -= 5;
+                } else {
+                  this.isShielded = false;
+                  this.health -= 5;
+                }
+                this.isTakingDamage = true;
+              }
+              if (target.getCurrentFrameIndex() === 0) {
+                this.isTakingDamage = false;
+              }
+            }
+            if (!isClose && target.isFrozen && target.health > 0) {
+              target.dx = 1;
+              target.currentRow = 1;
+              target.isFrozen = false;
+            }
+            break;
+
+          case target instanceof Skeleton:
+            isClose = target.x <= this.x + this.width - 70;
+            if (isClose && target.health > 0) {
+              if (!target.isFrozen) {
+                target.frameIndex = 0;
+                target.currentRow = 0;
+                target.dx = 0;
+                target.isFrozen = true;
+              }
+              if (
+                target.getCurrentFrameIndex() === 4 &&
+                target.tickCount === 0 &&
+                !this.isTakingDamage
+              ) {
+                if (this.shieldHealth > 0) {
+                  this.isShielded = true;
+                  this.shieldHealth -= 3;
+                } else {
+                  this.isShielded = false;
+                  this.health -= 3;
+                }
+                this.isTakingDamage = true;
+              }
+              if (target.getCurrentFrameIndex() !== 4) {
+                this.isTakingDamage = false;
+              }
+            }
+            if (!isClose && target.isFrozen && target.health > 0) {
+              target.dx = 1;
               target.currentRow = 2;
+              target.isFrozen = false;
+            }
+            break;
+
+          case target instanceof Samurai:
+            isClose = target.x <= this.x + this.width - 100;
+            if (isClose && target.health > 0) {
+              if (!target.isFrozen) {
+                target.frameIndex = 0;
+                target.dx = 0;
+                target.isFrozen = true;
+                target.ticksPerFrame = 8;
+                target.changeAnimation("attack");
+              }
+              if (
+                target.getCurrentFrameIndex() === 5 &&
+                target.tickCount === 0 &&
+                !this.isTakingDamage
+              ) {
+                if (this.shieldHealth > 0) {
+                  this.isShielded = true;
+                  this.shieldHealth -= 5;
+                } else {
+                  this.isShielded = false;
+                  this.health -= 5;
+                }
+                this.isTakingDamage = true;
+              }
+              if (target.getCurrentFrameIndex() !== 5) {
+                this.isTakingDamage = false;
+              }
+            }
+            if (!isClose && target.isFrozen && target.health > 0) {
+              target.dx = 1;
+              target.changeAnimation("run");
+              target.ticksPerFrame = 7;
+              target.isFrozen = false;
+            }
+            break;
+
+          case target instanceof Slime:
+            isClose = target.x <= this.x + this.width - 100;
+            if (isClose && target.health > 0) {
               target.dx = 0;
               target.isFrozen = true;
             }
-
+            if (!isClose && target.isFrozen && target.health > 0) {
+              target.dx = 1;
+              target.isFrozen = false;
+            }
             if (
-              target.getCurrentFrameIndex() === target.numberOfFrames - 1 &&
-              target.tickCount === 0 &&
-              !this.isTakingDamage
-            ) {
-              this.health -= 5;
-              this.isTakingDamage = true;
-            }
-
-            if (target.getCurrentFrameIndex() === 0) {
-              this.isTakingDamage = false;
-            }
-          }
-
-          if (!isClose && target.isFrozen && target.health > 0) {
-            target.dx = 1;
-            target.currentRow = 1;
-            target.isFrozen = false;
-          }
-        }
-
-        if (target instanceof Skeleton) {
-          const isClose = target.x <= this.x + this.width - 70;
-
-          if (isClose && target.health > 0) {
-            if (!target.isFrozen) {
-              target.frameIndex = 0;
-              target.currentRow = 0;
-              target.dx = 0;
-              target.isFrozen = true;
-            }
-
-            if (
-              target.getCurrentFrameIndex() === 4 &&
-              target.tickCount === 0 &&
-              !this.isTakingDamage
-            ) {
-              this.health -= 3;
-              this.isTakingDamage = true;
-            }
-
-            if (target.getCurrentFrameIndex() !== 4) {
-              this.isTakingDamage = false;
-            }
-          }
-
-          if (!isClose && target.isFrozen && target.health > 0) {
-            target.dx = 1;
-            target.currentRow = 2;
-            target.isFrozen = false;
-          }
-        }
-
-        if (target instanceof Samurai) {
-          const isClose = target.x <= this.x + this.width - 100;
-
-          if (isClose && target.health > 0) {
-            if (!target.isFrozen) {
-              target.frameIndex = 0;
-              target.dx = 0;
-              target.isFrozen = true;
-              target.ticksPerFrame = 8;
-              target.changeAnimation("attack");
-            }
-
-            if (
-              target.getCurrentFrameIndex() === 5 &&
-              target.tickCount === 0 &&
-              !this.isTakingDamage
-            ) {
-              this.health -= 5;
-              this.isTakingDamage = true;
-            }
-
-            if (target.getCurrentFrameIndex() !== 5) {
-              this.isTakingDamage = false;
-            }
-          }
-
-          if (!isClose && target.isFrozen && target.health > 0) {
-            target.dx = 1;
-            target.changeAnimation("run");
-            target.ticksPerFrame = 7;
-            target.isFrozen = false;
-          }
-        }
-
-        if (target instanceof Slime) {
-          var canHit = false;
-          const isClose = target.x <= this.x + this.width - 100;
-          if (isClose && target.health > 0) {
-            canHit = true;
-            target.dx = 0;
-            target.isFrozen = true;
-          }
-
-          if (!isClose && target.isFrozen && target.health > 0) {
-            canHit = true;
-            target.dx = 1;
-            target.isFrozen = false;
-          }
-
-          if (canHit) {
-            if (
+              isClose &&
               target.getCurrentFrameIndex() === 0 &&
               target.tickCount === 0 &&
               !this.isTakingDamage
             ) {
-              this.health -= 1;
+              if (this.shieldHealth > 0) {
+                this.isShielded = true;
+                this.shieldHealth -= 1;
+              } else {
+                this.isShielded = false;
+                this.health -= 1;
+              }
               this.isTakingDamage = true;
             }
-          }
-          if (target.animationCycleComplete()) {
-            this.isTakingDamage = false;
-          }
+            if (target.animationCycleComplete()) {
+              this.isTakingDamage = false;
+            }
+            break;
+
+          default:
+            break;
         }
       }
     });
@@ -358,8 +386,12 @@ class Hero extends Sprite {
 
   handleCollisions(sprites) {
     const projectiles = sprites.filter(
-      (sprite) => sprite instanceof Bullet || sprite instanceof Orb
+      (sprite) =>
+        sprite instanceof Bullet ||
+        sprite instanceof Orb ||
+        sprite instanceof Projectile
     );
+    const powerUps = sprites.filter((sprite) => sprite instanceof PowerUp);
     const targets = sprites.filter(
       (sprite) =>
         sprite instanceof Slime ||
@@ -369,13 +401,46 @@ class Hero extends Sprite {
         sprite instanceof Samurai
     );
 
+    powerUps.forEach((powerUp) => {
+      if (this.checkCollision(this, powerUp)) {
+        powerUp.applyEffect(this);
+        powerUp.destroyed = true;
+      }
+    });
+
     projectiles.forEach((projectile) => {
+      if (projectile instanceof Projectile) {
+        if (this.checkCollision(projectile, this)) {
+          if (!this.isHit) {
+            this.isHit = true;
+            if (this.shieldHealth > 0) {
+              this.shieldHealth -= 10;
+              if (this.shieldHealth <= 0) {
+                this.shieldHealth = 0;
+              }
+            } else {
+              this.health -= 10;
+              if (this.health <= 0) {
+                this.health = 0;
+                this.handlePlayerDeath();
+              }
+            }
+          }
+          projectile.destroyed = true;
+        } else {
+          this.isHit = false;
+        }
+
+        return;
+      }
+
       targets.forEach((target) => {
         if (this.checkCollision(projectile, target)) {
           if (target.health <= 0) {
             target.destroyed = true;
             return;
           }
+
           if (projectile instanceof Orb) {
             const explosion = new Explosion(
               target.x - 70,
@@ -393,7 +458,6 @@ class Hero extends Sprite {
           } else if (projectile instanceof Bullet) {
             target.health--;
           }
-
           projectile.destroyed = true;
 
           if (target.health <= 0) {
@@ -407,7 +471,6 @@ class Hero extends Sprite {
               target.dx = 0;
               target.destroyed = true;
             }
-
             if (target instanceof Bringer) {
               target.frameIndex = 0;
               target.ticksPerFrame = 22;
@@ -415,7 +478,6 @@ class Hero extends Sprite {
               target.dx = 0;
               target.destroyed = true;
             }
-
             if (target instanceof FinalBoss) {
               target.frameIndex = 0;
               target.ticksPerFrame = 25;
@@ -423,13 +485,17 @@ class Hero extends Sprite {
               target.dx = 0;
               target.destroyed = true;
             }
-            target.destroyed = true;
-            this.score = this.score + 10;
+            this.score += 10;
             this.scoreElement.innerHTML = `Score: ${this.score}`;
           }
         }
       });
     });
+
+    if (this.shieldHealth <= 0) {
+      this.shieldHealth = 0;
+      this.isShielded = false;
+    }
   }
 
   checkCollision(source, target) {
@@ -441,16 +507,21 @@ class Hero extends Sprite {
     );
   }
 
-  updateAnimation() {
-    const animation = this.animations[this.currentAnimation];
+  updateAnimation(currentAnimation) {
+    const animation = this.animations[currentAnimation];
     this.animation.tickCount++;
 
     if (this.animation.tickCount > animation.ticksPerFrame) {
       this.animation.tickCount = 0;
-      this.animation.frameIndex++;
-
-      if (this.animation.frameIndex >= animation.numberOfFrames) {
-        this.animation.frameIndex = 0;
+      if (this.currentAnimation === "death") {
+        if (this.animation.frameIndex < animation.numberOfFrames - 1) {
+          this.animation.frameIndex++;
+        }
+      } else {
+        this.animation.frameIndex++;
+        if (this.animation.frameIndex >= animation.numberOfFrames) {
+          this.animation.frameIndex = 0;
+        }
       }
     }
   }
@@ -458,12 +529,8 @@ class Hero extends Sprite {
   handlePlayerDeath() {
     if (this.health <= 0) {
       this.currentAnimation = "death";
-      this.animation.frameIndex = 0;
-      this.animation.tickCount = 0;
 
-      this.dx = 0;
-      this.vy = 0;
-      this.canShoot = false;
+      this.updateAnimation(this.currentAnimation);
 
       if (!this.deathSoundPlayed) {
         this.deathSoundEffect.play();
@@ -490,6 +557,7 @@ class Hero extends Sprite {
     );
 
     this.drawHealthBar(ctx);
+    this.drawShield(ctx);
   }
 
   drawHealthBar(ctx) {
@@ -501,13 +569,16 @@ class Hero extends Sprite {
     ctx.fillStyle = "green";
     ctx.fillRect(this.x - 22, this.y + 10, healthBarWidth, 5);
   }
+
+  drawShield(ctx) {
+    const shieldWidth = this.width * (this.shieldHealth / 60);
+    ctx.fillStyle = "lightblue";
+    ctx.fillRect(this.x - 22, this.y + 5, shieldWidth, 5);
+  }
 }
 
 var game = new Game();
-var myHero = new Hero(100, 525, 100, 100);
-var myBackground = new Background(0, 0, canvas.width, canvas.height);
-var generator = new EnemyGenerator();
-game.addSprite(myBackground);
-game.addSprite(myHero);
-game.addSprite(generator);
+var menuScreen = new MenuScreen();
+game.addSprite(menuScreen);
+game.animate();
 game.animate();

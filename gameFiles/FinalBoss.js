@@ -1,7 +1,7 @@
 class FinalBoss extends Sprite {
   constructor(y, width, height) {
     super();
-    this.x = canvas.width - 400;
+    this.x = canvas.width;
     this.y = y;
     this.width = width;
     this.height = height;
@@ -10,7 +10,8 @@ class FinalBoss extends Sprite {
     this.dx = 1;
     this.ticksPerFrame = 20;
     this.numberOfFrames = 4;
-    this.health = 100;
+    this.health = 300;
+    this.powerupDropped = false;
     this.destroyed = false;
     this.currentRow = 0;
     this.reverseAnimation = false;
@@ -27,6 +28,8 @@ class FinalBoss extends Sprite {
     this.finalBoss = new Image();
     this.finalBoss.src = this.animations[this.currentAnimation].src;
     this.numberOfFrames = this.animations[this.currentAnimation].frames;
+    this.shootCooldown = 1000;
+    this.lastShootTime = performance.now();
   }
 
   changeAnimation(animationName) {
@@ -39,7 +42,16 @@ class FinalBoss extends Sprite {
     }
   }
 
-  update() {
+  update(sprites) {
+    const currentTime = performance.now();
+
+    if (currentTime - this.lastShootTime >= this.shootCooldown) {
+      this.shootProjectile(sprites);
+      this.lastShootTime = currentTime;
+    }
+
+    this.checkHealthThreshold(sprites);
+
     if (this.destroyed) {
       this.dx = 0;
       this.tickCount++;
@@ -68,8 +80,37 @@ class FinalBoss extends Sprite {
         }
       }
     }
+
+    if (this.x <= 1200) {
+      this.dx = 0;
+    }
     this.x = this.x - this.dx / 2;
     return this.destroyed;
+  }
+
+  shootProjectile(sprites) {
+    const projectile = new Projectile(
+      this.x,
+      this.y + this.height / 2 + 10,
+      100,
+      100,
+      5
+    );
+    sprites.push(projectile);
+  }
+
+  checkHealthThreshold(sprites) {
+    if (this.health % 50 === 0) {
+      if (!this.powerupDropped) {
+        const types = ["health", "shield", "shootCooldown", "orbReady"];
+        const randomType = types[Math.floor(Math.random() * types.length)];
+        const powerup = new PowerUp(this.x, 595, randomType);
+        sprites.push(powerup);
+        this.powerupDropped = true;
+      }
+    } else {
+      this.powerupDropped = false;
+    }
   }
 
   draw(ctx) {
@@ -92,7 +133,7 @@ class FinalBoss extends Sprite {
   }
 
   drawHealthBar(ctx) {
-    const healthBarWidth = this.width * (this.health / 100);
+    const healthBarWidth = this.width * (this.health / 300);
     if (this.health < 0) {
       this.health = 0;
     }

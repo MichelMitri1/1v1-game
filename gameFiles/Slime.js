@@ -13,17 +13,24 @@ class Slime extends Sprite {
     this.health = 10;
     this.destroyed = false;
     this.isFrozen = false;
+    this.isPowerUpDropped = false;
     this.slime = new Image();
     this.slime.src = "/animation/slime/slime.png";
   }
 
-  update() {
+  update(sprites) {
     this.tickCount++;
     if (this.tickCount > this.ticksPerFrame) {
       this.tickCount = 0;
       this.frameIndex++;
       if (this.frameIndex >= this.numberOfFrames) {
         this.frameIndex = 0;
+      }
+    }
+    if (this.destroyed) {
+      if (!this.isPowerUpDropped) {
+        this.dropPowerUp(sprites);
+        this.isPowerUpDropped = true;
       }
     }
     this.x -= this.dx;
@@ -47,6 +54,16 @@ class Slime extends Sprite {
     );
 
     this.drawHealthBar(ctx);
+  }
+
+  dropPowerUp(sprites) {
+    const dropChance = Math.random();
+    if (dropChance < 0.3) {
+      const types = ["health", "shield", "shootCooldown", "orbReady"];
+      const randomType = types[Math.floor(Math.random() * types.length)];
+      const powerup = new PowerUp(this.x, 595, randomType);
+      sprites.push(powerup);
+    }
   }
 
   drawHealthBar(ctx) {

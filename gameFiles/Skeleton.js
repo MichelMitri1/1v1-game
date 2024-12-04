@@ -14,12 +14,13 @@ class Skeleton extends Sprite {
     this.destroyed = false;
     this.isFrozen = false;
     this.currentRow = 2;
+    this.isPowerUpDropped = false;
     this.reverseAnimation = true;
     this.skeleton = new Image();
     this.skeleton.src = "/animation/skeleton/skeleton.png";
   }
 
-  update() {
+  update(sprites) {
     if (this.destroyed) {
       this.dx = 0;
       this.tickCount++;
@@ -30,6 +31,12 @@ class Skeleton extends Sprite {
           this.frameIndex = 0;
         }
       }
+
+      if (!this.isPowerUpDropped) {
+        this.dropPowerUp(sprites);
+        this.isPowerUpDropped = true;
+      }
+
       return this.destroyed && this.frameIndex <= 0;
     }
 
@@ -50,6 +57,16 @@ class Skeleton extends Sprite {
     }
     this.x -= this.dx;
     return this.destroyed;
+  }
+
+  dropPowerUp(sprites) {
+    const dropChance = Math.random();
+    if (dropChance < 0.3) {
+      const types = ["health", "shield", "shootCooldown", "orbReady"];
+      const randomType = types[Math.floor(Math.random() * types.length)];
+      const powerup = new PowerUp(this.x, 595, randomType);
+      sprites.push(powerup);
+    }
   }
 
   draw(ctx) {

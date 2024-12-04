@@ -10,10 +10,9 @@ class Background extends Sprite {
     this.backgroundSpeed = 2;
   }
 
-  update() {
-    if (this.x <= -this.width) {
-      this.x = 0;
-    }
+  update(sprites) {
+    console.log(sprites);
+    
   }
 
   draw(ctx) {

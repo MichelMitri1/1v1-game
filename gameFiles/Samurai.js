@@ -14,7 +14,7 @@ class Samurai extends Sprite {
     this.isFrozen = false;
     this.currentRow = 0;
     this.reverseAnimation = true;
-
+    this.isPowerUpDropped = false;
     this.animations = {
       idle: { src: "/animation/samurai/IDLE.png", frames: 10 },
       attack: { src: "/animation/samurai/ATTACK 1.png", frames: 7 },
@@ -38,7 +38,7 @@ class Samurai extends Sprite {
     }
   }
 
-  update() {
+  update(sprites) {
     if (this.destroyed) {
       this.dx = 0;
       this.tickCount++;
@@ -49,6 +49,12 @@ class Samurai extends Sprite {
           this.frameIndex = 0;
         }
       }
+
+      if (!this.isPowerUpDropped) {
+        this.dropPowerUp(sprites);
+        this.isPowerUpDropped = true;
+      }
+
       return this.destroyed || this.frameIndex <= 0;
     }
 
@@ -92,6 +98,16 @@ class Samurai extends Sprite {
 
   getCurrentFrameIndex() {
     return this.frameIndex;
+  }
+
+  dropPowerUp(sprites) {
+    const dropChance = Math.random();
+    if (dropChance < 0.3) {
+      const types = ["health", "shield", "shootCooldown", "orbReady"];
+      const randomType = types[Math.floor(Math.random() * types.length)];
+      const powerup = new PowerUp(this.x, 595, randomType);
+      sprites.push(powerup);
+    }
   }
 
   drawHealthBar(ctx) {
