@@ -26,7 +26,6 @@ class Hero extends Sprite {
     this.originalOrbCooldown = this.orbCooldown;
     this.isTakingDamage = false;
     this.level = 1;
-    this.wave = 1;
     this.animations = {
       idle: {
         spriteSheet: new Image(),
@@ -79,33 +78,6 @@ class Hero extends Sprite {
   }
 
   initUI() {
-    const preconnect1 = document.createElement("link");
-    preconnect1.rel = "preconnect";
-    preconnect1.href = "https://fonts.googleapis.com";
-    document.head.appendChild(preconnect1);
-
-    const preconnect2 = document.createElement("link");
-    preconnect2.rel = "preconnect";
-    preconnect2.href = "https://fonts.gstatic.com";
-    preconnect2.crossOrigin = "anonymous";
-    document.head.appendChild(preconnect2);
-
-    const fontLink = document.createElement("link");
-    fontLink.href =
-      "https://fonts.googleapis.com/css2?family=Tiny5&display=swap";
-    fontLink.rel = "stylesheet";
-    document.head.appendChild(fontLink);
-
-    const styleElement = document.createElement("style");
-    styleElement.innerHTML = `
-      .tiny5-regular {
-        font-family: "Tiny5", sans-serif;
-        font-weight: 400;
-        font-style: normal;
-      }
-    `;
-    document.head.appendChild(styleElement);
-
     const canvas = document.getElementById("canvas");
     canvas.style.position = "relative";
 
@@ -129,6 +101,12 @@ class Hero extends Sprite {
     this.orbReadyElement.className = "tiny5-regular";
     this.container.appendChild(this.orbReadyElement);
 
+    this.levelElement = document.createElement("h1");
+    this.levelElement.id = "level";
+    this.levelElement.innerHTML = `Level: ${this.level}`;
+    this.levelElement.className = "tiny5-regular";
+    this.container.appendChild(this.levelElement);
+
     canvas.parentElement.appendChild(this.container);
   }
 
@@ -138,10 +116,13 @@ class Hero extends Sprite {
       this.handleShooting(sprites, keys);
       this.handleCheckIfEnemyCloseToPlayer(sprites);
       this.handleCollisions(sprites);
-      this.updateAnimation(this.currentAnimation);
+      this.updateAnimation(sprites, this.currentAnimation);
+      if (keys["n"] && this.level === 1) {
+        this.nextLevel();
+      }
     } else {
-      this.updateAnimation("death");
-      this.handlePlayerDeath();
+      this.updateAnimation(sprites, "death");
+      this.handlePlayerDeath(sprites, keys);
     }
   }
 
@@ -179,6 +160,10 @@ class Hero extends Sprite {
       this.currentAnimation = "run";
     } else {
       this.currentAnimation = "idle";
+    }
+
+    if (keys["r"]) {
+      this.restartGame();
     }
 
     this.x += this.dx;
@@ -420,10 +405,6 @@ class Hero extends Sprite {
               }
             } else {
               this.health -= 10;
-              if (this.health <= 0) {
-                this.health = 0;
-                this.handlePlayerDeath();
-              }
             }
           }
           projectile.destroyed = true;
@@ -507,7 +488,7 @@ class Hero extends Sprite {
     );
   }
 
-  updateAnimation(currentAnimation) {
+  updateAnimation(sprites, currentAnimation) {
     const animation = this.animations[currentAnimation];
     this.animation.tickCount++;
 
@@ -516,6 +497,18 @@ class Hero extends Sprite {
       if (this.currentAnimation === "death") {
         if (this.animation.frameIndex < animation.numberOfFrames - 1) {
           this.animation.frameIndex++;
+        } else {
+          sprites.forEach((sprite) => {
+            if (
+              sprite instanceof Slime ||
+              sprite instanceof Samurai ||
+              sprite instanceof FinalBoss ||
+              sprite instanceof Bringer ||
+              sprite instanceof Skeleton
+            ) {
+              sprites.pop(sprite);
+            }
+          });
         }
       } else {
         this.animation.frameIndex++;
@@ -526,17 +519,46 @@ class Hero extends Sprite {
     }
   }
 
-  handlePlayerDeath() {
+  handlePlayerDeath(sprites, keys) {
     if (this.health <= 0) {
       this.currentAnimation = "death";
-
-      this.updateAnimation(this.currentAnimation);
+      this.updateAnimation(sprites, this.currentAnimation);
 
       if (!this.deathSoundPlayed) {
         this.deathSoundEffect.play();
         this.deathSoundPlayed = true;
       }
     }
+
+    if (keys["r"]) {
+      this.restartGame();
+    }
+  }
+
+  restartGame() {
+    game.paused = false;
+    game.sprites = [];
+    this.health = 200;
+    this.shieldHealth = 60;
+    this.orbCooldown = 1600;
+    this.score = 0;
+    this.x = 100;
+    const menuScreen = new MenuScreen();
+    menuScreen.startGame(this.level);
+    game.addSprite(menuScreen);
+  }
+
+  nextLevel() {
+    game.paused = false;
+    game.sprites = [];
+    this.health = 200;
+    this.shieldHealth = 60;
+    this.orbCooldown = 1600;
+    this.score = 0;
+    this.x = 100;
+    const menuScreen = new MenuScreen();
+    menuScreen.startGame(this.level + 1);
+    game.addSprite(menuScreen);
   }
 
   draw(ctx) {
@@ -558,6 +580,25 @@ class Hero extends Sprite {
 
     this.drawHealthBar(ctx);
     this.drawShield(ctx);
+    if (game.paused) {
+      this.drawPauseMenu(ctx);
+    }
+    if (this.health <= 0) {
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "white";
+      ctx.font = "48px Tiny5, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+
+      ctx.font = "24px Tiny5, sans-serif";
+      ctx.fillText(
+        "Press R to Restart",
+        canvas.width / 2,
+        canvas.height / 2 + 50
+      );
+    }
   }
 
   drawHealthBar(ctx) {
@@ -568,6 +609,29 @@ class Hero extends Sprite {
 
     ctx.fillStyle = "green";
     ctx.fillRect(this.x - 22, this.y + 10, healthBarWidth, 5);
+  }
+
+  drawPauseMenu(ctx) {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "white";
+    ctx.font = "48px Tiny5, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Game Paused", canvas.width / 2, canvas.height / 2);
+
+    ctx.font = "24px Tiny5, sans-serif";
+    ctx.fillText(
+      "Press R to Restart",
+      canvas.width / 2,
+      canvas.height / 2 + 50
+    );
+
+    ctx.fillText(
+      "Press C to Continue",
+      canvas.width / 2,
+      canvas.height / 2 + 100
+    );
   }
 
   drawShield(ctx) {

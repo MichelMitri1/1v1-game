@@ -26,7 +26,7 @@ class FinalBoss extends Sprite {
     this.finalBoss = new Image();
     this.finalBoss.src = this.animations[this.currentAnimation].src;
     this.numberOfFrames = this.animations[this.currentAnimation].frames;
-    this.shootCooldown = 700;
+    this.shootCooldown = 1500;
     this.lastShootTime = performance.now();
   }
 

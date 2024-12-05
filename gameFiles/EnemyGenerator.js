@@ -57,5 +57,32 @@ class EnemyGenerator extends Sprite {
     sprites.push(this.finalBoss);
   }
 
-  draw(ctx) {}
+  draw(ctx) {
+    if (this.finalBoss && this.finalBoss.health <= 0) {
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "white";
+      ctx.font = "48px Tiny5, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(
+        `Level ${this.level} Completed!`,
+        canvas.width / 2,
+        canvas.height / 2
+      );
+
+      ctx.font = "24px Tiny5, sans-serif";
+      ctx.fillText(
+        this.level === 1 ? "Press N to Continue to Level 2" : "You Won!",
+        canvas.width / 2,
+        canvas.height / 2 + 100
+      );
+
+      ctx.fillText(
+        "Press R to Restart Level",
+        canvas.width / 2,
+        canvas.height / 2 + 50
+      );
+    }
+  }
 }
