@@ -1,31 +1,45 @@
 class EnemyGenerator extends Sprite {
   constructor(level) {
-    super();
-    this.enemies = [];
-    this.finalBoss = null;
-    this.defeatedEnemies = 0;
-    this.maxEnemies = level === 1 ? 20 : 30;
-    this.spawnIndex = 0;
-    this.level = level;
-    this.spawnDelayFrames = level === 1 ? 360 : 320;
-    this.currentFrame = 0;
-    if (level === 1) {
-      this.enemyData = [
-        { type: Slime, x: canvas.width, y: 455, width: 200, height: 250 },
-        { type: Skeleton, x: canvas.width, y: 437, width: 200, height: 250 },
-        { type: Bringer, x: canvas.width, y: 427, width: 300, height: 200 },
-      ];
-    } else {
-      this.enemyData = [
-        { type: Slime, x: canvas.width, y: 455, width: 200, height: 250 },
-        { type: Bringer, x: canvas.width, y: 427, width: 300, height: 200 },
-        { type: Skeleton, x: canvas.width, y: 437, width: 200, height: 250 },
-        { type: Samurai, x: canvas.width, y: 467, width: 250, height: 250 },
-      ];
-    }
+    super(); // Inherit from Sprite
+    this.enemies = []; // List of spawned enemies
+    this.finalBoss = null; // Reference to the final boss
+    this.defeatedEnemies = 0; // Tracks defeated enemies
+    this.maxEnemies = level === 1 ? 10 : 15; // Max enemies based on level
+    this.spawnIndex = 0; // Tracks how many enemies have been spawned
+    this.level = level; // Current level
+    this.spawnDelayFrames = level === 1 ? 360 : 320; // Delay between enemy spawns
+    this.currentFrame = 0; // Tracks game frames
+
+    // Enemy types and their properties per level
+    this.enemyData =
+      level === 1
+        ? [
+            { type: Slime, x: canvas.width, y: 455, width: 200, height: 250 },
+            {
+              type: Skeleton,
+              x: canvas.width,
+              y: 437,
+              width: 200,
+              height: 250,
+            },
+            { type: Bringer, x: canvas.width, y: 427, width: 300, height: 200 },
+          ]
+        : [
+            { type: Slime, x: canvas.width, y: 455, width: 200, height: 250 },
+            { type: Bringer, x: canvas.width, y: 427, width: 300, height: 200 },
+            {
+              type: Skeleton,
+              x: canvas.width,
+              y: 437,
+              width: 200,
+              height: 250,
+            },
+            { type: Samurai, x: canvas.width, y: 467, width: 250, height: 250 },
+          ];
   }
 
   update(sprites) {
+    // Spawn new enemies at specified intervals
     if (
       this.spawnIndex < this.maxEnemies &&
       this.currentFrame % this.spawnDelayFrames === 0
@@ -44,20 +58,26 @@ class EnemyGenerator extends Sprite {
     }
     this.currentFrame++;
 
+    // Remove defeated enemies from the active list
     this.enemies = this.enemies.filter((enemy) => !enemy.isDefeated);
 
+    // Count how many enemies have been defeated
     this.defeatedEnemies = this.maxEnemies - this.enemies.length;
+
+    // Spawn the final boss when all enemies are defeated
     if (this.defeatedEnemies === 0 && !this.finalBoss) {
       this.spawnFinalBoss(sprites);
     }
   }
 
   spawnFinalBoss(sprites) {
+    // Adds the final boss to the game
     this.finalBoss = new FinalBoss(430, 200, 200);
     sprites.push(this.finalBoss);
   }
 
   draw(ctx) {
+    // Displays the level completion screen after defeating the final boss
     if (this.finalBoss && this.finalBoss.health <= 0) {
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
